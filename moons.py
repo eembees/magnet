@@ -1,6 +1,8 @@
 # coding=utf-8
 from typing import List
 
+import os
+
 from sklearn.datasets import make_moons, make_blobs, make_circles
 from sklearn.model_selection import train_test_split
 import numpy as np
@@ -13,12 +15,15 @@ from magnn.optimize import SGD
 from magnn.train import train
 from magnn.io import Scaler, BatchIterator
 
+# cast envvar
+VERBOSE=bool(os.getenv("VERBOSE", False))
+
 Act = Swish
 
 
 lr_init = 0.005
-epochs_first = 5000
-epochs_second = 1000
+epochs_first = 1000
+epochs_second = 100
 val_frequency = 10
 n_data = 5000
 early_stopping = False
@@ -36,8 +41,8 @@ losses = []
 
 
 # CODE STARTS HERE
-# ds = make_moons(n_samples=n_data, noise=0.3)
-ds = make_circles(n_samples=n_data, noise=0.01, factor=0.3)
+ds = make_moons(n_samples=n_data, noise=0.1)
+# ds = make_circles(n_samples=n_data, noise=0.01, factor=0.3)
 
 
 def encode_binary(y: int) -> List:
@@ -66,10 +71,10 @@ net = Net(
     [
         Linear(input_size=2, output_size=first_layer_width),
         Act(),
-        Dropout(prob=dropout_prob, size=first_layer_width),
+        # Dropout(prob=dropout_prob, size=first_layer_width),
         Linear(input_size=first_layer_width, output_size=second_layer_width),
         Act(),
-        Dropout(prob=dropout_prob, size=second_layer_width),
+        # Dropout(prob=dropout_prob, size=second_layer_width),
         # Linear(input_size=second_layer_width, output_size=third_layer_width),
         # Act(),
         # Dropout(prob=dropout_prob, size=third_layer_width),
@@ -88,6 +93,7 @@ loss_1, loss_1_val = train(
     iterator=BatchIterator(batch_size=100),
     optim=SGD(lr=lr_init),
     early_stopping=early_stopping,
+    verbose=VERBOSE,
 )
 
 loss_2, loss_2_val = train(
@@ -100,6 +106,7 @@ loss_2, loss_2_val = train(
     iterator=BatchIterator(batch_size=100),
     optim=SGD(lr=lr_init * 0.1),
     early_stopping=early_stopping,
+    verbose=VERBOSE,
 )
 # fix validation graph
 loss_1_val = np.concatenate([[i] * val_frequency for i in loss_1_val])

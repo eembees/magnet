@@ -1,5 +1,6 @@
 # coding=utf-8
 from typing import List
+import os
 
 from sklearn.datasets import make_moons, make_blobs, make_circles
 from sklearn.model_selection import train_test_split
@@ -13,13 +14,18 @@ from magnn.optimize import SGD
 from magnn.train import train
 from magnn.io import Scaler, BatchIterator
 
+
+# cast envvar
+VERBOSE=bool(os.getenv("VERBOSE", False))
+
+
 Act = Swish
 
 lr_init = 0.005
-epochs_first = 5000
-epochs_second = 1000
+epochs_first = 1000
+epochs_second = 500
 val_frequency = 10
-n_data = 5000
+n_data = 2000
 early_stopping = False
 dropout_prob = 0.2
 

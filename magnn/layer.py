@@ -54,8 +54,19 @@ def square(x: Tensor) -> Tensor:
 def square_p(x: Tensor) -> Tensor:
     return 2 * x
 
+def softmax(x: Tensor) -> Tensor:
+    # num stability norm over each row in x (x are scores)
+    # (i.e. across all key vectors for each query)
+    exp_scores = np.exp(x - np.max(x, axis=-1, keepdims=True))  
+    return exp_scores / np.sum(exp_scores, axis=-1, keepdims=True)
+
+def self_attn(x:Tensor, mask, W_KQV, W_out):
+    K,Q,V = np.split(x@W_KQV, 3, axis=1)
+    attn = softmax(K@Q.T / np.sqrt(X.shape[1])+mask)
+    return attn@V@W_out, attn
 
 class Layer:
+    # ABC for layer, no impl here
     def __init__(self) -> None:
         self.params: Dict[str, Tensor] = {}
         self.grads: Dict[str, Tensor] = {}
